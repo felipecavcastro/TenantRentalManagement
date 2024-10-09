@@ -14,7 +14,7 @@ public class PersonModel extends RepresentationModel<PersonModel> implements Ser
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private UUID idPerson;
+    private UUID idPerson ;
     private String name;
     private long documentNumber;
 
