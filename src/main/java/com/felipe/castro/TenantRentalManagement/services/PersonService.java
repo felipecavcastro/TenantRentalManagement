@@ -3,13 +3,11 @@ package com.felipe.castro.TenantRentalManagement.services;
 import com.felipe.castro.TenantRentalManagement.dtos.PersonRecordDto;
 import com.felipe.castro.TenantRentalManagement.models.PersonModel;
 import com.felipe.castro.TenantRentalManagement.repositories.PersonRepository;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class PersonService {
@@ -17,36 +15,46 @@ public class PersonService {
     @Autowired
     private PersonRepository personRepository;
 
-    public PersonModel savePerson(PersonRecordDto personRecordDto) {
-        PersonModel personModel = new PersonModel();
-        BeanUtils.copyProperties(personRecordDto, personModel);
-        return personRepository.save(personModel);
+    public PersonRecordDto create(PersonRecordDto personRecordDto) {
+        PersonModel createdPerson = personRepository.save(fromDtoToModel(personRecordDto));
+        return fromModelToDto(createdPerson);
     }
 
-    public List<PersonModel> getAllPersons() {
-        return personRepository.findAll();
+    private PersonModel fromDtoToModel(PersonRecordDto dto) {
+        return PersonModel.builder()
+                .idPerson(dto.id())
+                .name(dto.name())
+                .document(dto.cpf())
+                .email(dto.email())
+                .build();
     }
 
-    public Optional<PersonModel> getOnePerson(UUID id) {
-        return personRepository.findById(id);
+    private PersonRecordDto fromModelToDto(PersonModel model) {
+        return new PersonRecordDto(model.getIdPerson(), model.getName(), model.getDocument(), model.getEmail());
     }
 
-    public PersonModel updatePerson(UUID id, PersonRecordDto personRecordDto) {
-        Optional<PersonModel> personO = personRepository.findById(id);
-        if (personO.isPresent()) {
-            PersonModel personModel = personO.get();
-            BeanUtils.copyProperties(personRecordDto, personModel);
-            return personRepository.save(personModel);
+    public List<PersonRecordDto> getAll() {
+        return personRepository.findAll().stream().map(this::fromModelToDto).toList();
+    }
+
+    public PersonRecordDto getOne(Integer id) {
+        Optional<PersonModel> person = personRepository.findById(id);
+        return person.map(this::fromModelToDto).orElse(null);
+    }
+
+    public PersonRecordDto update(PersonRecordDto personRecordDto) {
+        Optional<PersonModel> person = personRepository.findById(personRecordDto.id());
+
+        if (person.isEmpty()) {
+            return null;
         }
-        return null;
-    }
 
-    public boolean deletePerson(UUID id) {
-        Optional<PersonModel> personO = personRepository.findById(id);
-        if (personO.isPresent()) {
-            personRepository.delete(personO.get());
-            return true;
-        }
-        return false;
+        PersonModel existentPerson = person.get();
+
+        existentPerson.setName(personRecordDto.name());
+        existentPerson.setEmail(personRecordDto.email());
+
+        PersonModel updatedPerson = personRepository.save(existentPerson);
+        return fromModelToDto(updatedPerson);
     }
 }

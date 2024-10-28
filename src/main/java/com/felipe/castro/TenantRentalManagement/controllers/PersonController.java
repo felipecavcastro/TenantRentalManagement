@@ -1,80 +1,75 @@
 package com.felipe.castro.TenantRentalManagement.controllers;
 
 import com.felipe.castro.TenantRentalManagement.dtos.PersonRecordDto;
-import com.felipe.castro.TenantRentalManagement.models.PersonModel;
-import com.felipe.castro.TenantRentalManagement.repositories.PersonRepository;
+import com.felipe.castro.TenantRentalManagement.services.PersonService;
+import com.felipe.castro.TenantRentalManagement.utils.DocumentValidator;
 import jakarta.validation.Valid;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import java.util.Objects;
 
 
 @RestController
 public class PersonController {
 
     @Autowired
-    PersonRepository personRepository;
+    PersonService personService;
 
     @PostMapping("/persons")
-    public ResponseEntity<PersonModel> savePerson(@RequestBody @Valid PersonRecordDto personRecordDto) {
-        var personModel = new PersonModel();
-        BeanUtils.copyProperties(personRecordDto, personModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(personRepository.save(personModel));
+    public ResponseEntity<Object> post(@RequestBody @Valid PersonRecordDto personRecordDto) {
+        if (personRecordDto.id() != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A new Person body should not contain an id.");
+        }
+
+        if (personRecordDto.cpf() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The CPF must be present.");
+        }
+
+        if (!DocumentValidator.isCpfValid(personRecordDto.cpf())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The given document is not valid.");
+        }
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(personService.create(personRecordDto));
     }
 
     @GetMapping("/persons")
-    public ResponseEntity<List<PersonModel>> getAllPersons() {
-        List<PersonModel> personsList = personRepository.findAll();
-        if (!personsList.isEmpty()){
-            for (PersonModel person : personsList){
-                UUID id = person.getIdPerson();
-                person.add(linkTo(methodOn(PersonController.class).getOnePerson(id)).withSelfRel());
-            }
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(personsList);
+    public ResponseEntity<List<PersonRecordDto>> getAlL() {
+        return ResponseEntity.status(HttpStatus.OK).body(personService.getAll());
     }
 
     @GetMapping("/persons/{id}")
-    public ResponseEntity<Object> getOnePerson(@PathVariable(value="id") UUID id){
-        Optional<PersonModel> personO = personRepository.findById(id);
-        if(personO.isEmpty())  {
+    public ResponseEntity<Object> getOne(@PathVariable(value = "id") Integer id) {
+        PersonRecordDto person = personService.getOne(id);
+
+        if (Objects.isNull(person)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found.");
         }
-        personO.get().add(linkTo(methodOn(PersonController.class).getAllPersons()).withRel("Persons List"));
-    return ResponseEntity.status(HttpStatus.OK).body(personO.get());
+
+        return ResponseEntity.status(HttpStatus.OK).body(person);
     }
 
-    @PutMapping("/persons/{id}")
-    public ResponseEntity<Object> updatePerson(@PathVariable(value="id") UUID id,
-                                               @RequestBody @Valid PersonRecordDto personRecordDto) {
-        Optional<PersonModel> personO = personRepository.findById(id);
-        if (personO.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found.");
+    @PatchMapping("/persons/{id}")
+    public ResponseEntity<Object> patch(@PathVariable(value = "id") Integer id,
+                                        @RequestBody @Valid PersonRecordDto personRecordDto) {
+
+        if (personRecordDto.cpf() != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("CPF should not be send to update.");
         }
-        var personModel = personO.get();
-        BeanUtils.copyProperties(personRecordDto, personModel);
-        return ResponseEntity.status(HttpStatus.OK).body(personRepository.save(personModel));
+
+        if (!id.equals(personRecordDto.id())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Person id from path doesn't match the body id.");
+        }
+
+        PersonRecordDto updatedPerson = personService.update(personRecordDto);
+
+        if (updatedPerson == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No person was found/updated");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(updatedPerson);
     }
-
-    @DeleteMapping("/persons/{id}")
-    public ResponseEntity<Object> deletePerson(@PathVariable(value="id")UUID id) {
-        Optional<PersonModel> personO = personRepository.findById(id);
-        if (personO.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Person not found.");
-        }
-        personRepository.delete(personO.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Person deleted successfully.");
-        }
-    }
-
-
+}
