@@ -54,38 +54,37 @@ A aplicação estará disponível em http://localhost:8080.
 - **POST /persons**: Cria um novo inquilino.
 - **GET /persons**: Retorna todos os inquilinos.
 - **GET /persons/{id}**: Retorna um inquilino específico pelo ID.
-- **PUT /persons/{id}**: Atualiza um inquilino pelo ID.
+- **PATCH /persons/{id}**: Atualiza um inquilino pelo ID.
 
 ## Real Estate Endpoints
 - **POST /realestates**: Cria uma nova propriedade.
 - **GET /realestates**: Retorna todas as propriedades.
 - **GET /realestates/{id}**: Retorna uma propriedade específica pelo ID.
-- **PUT /realestates/{id}**: Atualiza uma propriedade pelo ID.
-- **DELETE /realestates/{id}**: Exclui uma propriedade pelo ID.
+- **PATCH /realestates/{id}**: Atualiza uma propriedade pelo ID.
 ## Contract Endpoints
 - **POST /contracts**: Cria um novo contrato de aluguel.
 - **GET /contracts**: Retorna todos os contratos.
 - **GET /contracts/{id}**: Retorna um contrato específico pelo ID.
-- **PUT /contracts/{id}**: Atualiza um contrato pelo ID.
-- **DELETE /contracts/{id}**: Exclui um contrato pelo ID.
+- **PATCH /contracts/{id}**: Atualiza um contrato pelo ID.
 ## Modelo de Dados
 ## PersonModel
-- **UUID idPerson**
+- **Integer idPerson**
 - **String name**
+- **String document** 
 - **String email**
 - **String phoneNumber**
 ## RealEstateModel
-- **UUID idRealEstate**
+- **Integer idRealEstate**
 - **String address**
 - **String type**
-- **double price**
+- **BigDecimal price**
 ## ContractModel
-- **UUID idContract**
+- **Integer idContract**
 - **PersonModel person**
 - **RealEstateModel realEstate**
 - **Date startDate**
 - **Date endDate**
-- **double rentAmount**
+- **BigDecimal rentAmount**
 ## Contribuindo
 Contribuições são bem-vindas! Sinta-se à vontade para abrir uma issue ou enviar um pull request.
 
