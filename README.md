@@ -4,7 +4,7 @@ Este é um projeto de gerenciamento de aluguel de inquilinos desenvolvido com Ja
 
 ## Funcionalidades
 
-- **Gerenciamento de Inquilinos**: CRUD para gerenciar informações dos inquilinos.
+- **Gerenciamento de Inquilinos**: Criação, leitura e update para gerenciar informações dos inquilinos.
 - **Gerenciamento de Propriedades**: CRUD para gerenciar informações das propriedades imobiliárias.
 - **Gerenciamento de Contratos**: CRUD para gerenciar contratos de aluguel entre inquilinos e propriedades.
 - **Links HATEOAS**: Facilita a navegação entre os recursos.
@@ -15,14 +15,13 @@ Este é um projeto de gerenciamento de aluguel de inquilinos desenvolvido com Ja
 - Spring Boot
 - Spring Data JPA
 - Hibernate
-- H2 Database (ou outra base de dados, conforme configuração)
+- H2 Database
 - Maven
-- HATEOAS para links de navegação
 
 ## Pré-requisitos
 
 - [Java 17](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html) ou superior
-- [Maven](https://maven.apache.org/) para gerenciamento de dependências
+- [Maven](https://maven.apache.org/) (wrapper no repositório)
 - Um IDE ou editor de texto com suporte a Java (como IntelliJ IDEA, Eclipse, ou VSCode)
 
 ## Configuração do Projeto
@@ -38,7 +37,7 @@ Este é um projeto de gerenciamento de aluguel de inquilinos desenvolvido com Ja
 
 3. **Instale as dependências do Maven**
 
-    mvn clean install
+    ./mvnw clean install
 
 4. **Configure o banco de dados**
 
@@ -56,7 +55,7 @@ A aplicação estará disponível em http://localhost:8080.
 - **GET /persons**: Retorna todos os inquilinos.
 - **GET /persons/{id}**: Retorna um inquilino específico pelo ID.
 - **PUT /persons/{id}**: Atualiza um inquilino pelo ID.
-- **DELETE /persons/{id}**: Exclui um inquilino pelo ID.
+
 ## Real Estate Endpoints
 - **POST /realestates**: Cria uma nova propriedade.
 - **GET /realestates**: Retorna todas as propriedades.
